@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription Revenue Calculator</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0B1AAD, #5BEBDC);
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      max-width: 1000px;
+      margin: 50px auto;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .main-content,
+    .sidebar,
+    .result {
+      width: 100%;
+      padding: 20px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .main-content:hover,
+    .sidebar:hover,
+    .result:hover {
+      transform: translateY(-5px);
+    }
+
+    .main-content {
+      flex: 1;
+    }
+
+    .sidebar {
+      flex: 0.4;
+      max-width: 300px;
+    }
+
+    h2, h3 {
+      text-align: center;
+      color: #4a4a4a;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    .form-group input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #000ABD;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #4b42c1;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .highlight {
+      background-color: white;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 20px;
+      color: #4a4a4a;
+      text-align: center;
+    }
+
+    /* Responsive Styles for Mobile */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <h2>Subscription Revenue Calculator</h2>
+
+      <div class="form-group">
+        <label for="sector">Sector</label>
+        <select id="sector">
+          <option value="Food and Drinks">Food and Drinks</option>
+          <option value="Supplements & Vitamins">Supplements & Vitamins</option>
+          <option value="Health & Wellness">Health & Wellness</option>
+          <option value="Cosmetics">Cosmetics</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="customers">Average Monthly Customers</label>
+        <input type="number" id="customers" min="0" max="1000000" step="10000" value="500000" oninput="updateCustomerValue(this.value)">
+        <div class="range-value">Value: <span id="customerValue">500,000</span></div>
+      </div>
+
+      <div class="form-group">
+        <label for="ltv">Average Customer LTV ($)</label>
+        <input type="number" id="ltv" min="0" max="100000" step="1000" value="50000" oninput="updateLtvValue(this.value)">
+        <div class="range-value">Value: $<span id="ltvValue">50,000</span></div>
+      </div>
+
+      <button class="btn" onclick="calculateRevenue()">Get Results</button>
+    </div>
+
+    <!-- Sidebar Area (Calculation Explanation) -->
+    <div class="sidebar">
+      <h3>How we calculate it?</h3>
+      <p>For this exercise, we analyzed data from 1,000 Sharpei brands.</p>
+      <p><strong>On average, we increase LTV 2x.</strong></p>
+      <p>The new monthly revenue is calculated by taking the LTV and the new number of monthly customers.</p>
+      <p>The increase in monthly customers is based on the sector-specific conversion rate increase.</p>
+    </div>
+
+    <!-- Results section positioned below -->
+    <div class="result" id="result">
+      <h3>When you offer subscriptions with Sharpei</h3>
+      <div class="highlight">
+        <p id="newMonthlyClients"></p>
+        <p id="newLtv"></p>
+        <p id="newRevenue"></p>
+        <p id="revenueIncreaseDollar"></p>
+        <p id="revenueIncreasePercent"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateCustomerValue(value) {
+      document.getElementById('customerValue').textContent = parseInt(value).toLocaleString();
+    }
+
+    function updateLtvValue(value) {
+      document.getElementById('ltvValue').textContent = parseInt(value).toLocaleString();
+    }
+
+    function calculateRevenue() {
+      const customers = parseFloat(document.getElementById('customers').value);
+      const ltv = parseFloat(document.getElementById('ltv').value);
+      const sector = document.getElementById('sector').value;
+
+      const originalRevenue = (ltv / 12) * customers;
+      const newLtv = ltv * 2;
+
+      let increaseRate;
+      if (sector === 'Food and Drinks') {
+        increaseRate = 0.10;
+      } else {
+        increaseRate = 0.15;
+      }
+
+      const newMonthlyClients = customers * (1 + increaseRate);
+      const newRevenue = (newLtv / 12) * newMonthlyClients;
+      const revenueIncreaseDollar = newRevenue - originalRevenue;
+      const revenueIncreasePercent = ((newRevenue - originalRevenue) / originalRevenue) * 100;
+
+      document.getElementById('newMonthlyClients').textContent = `New Number of Monthly Clients: ${newMonthlyClients.toFixed(2)}`;
+      document.getElementById('newLtv').textContent = `New LTV: $${newLtv.toFixed(2)}`;
+      document.getElementById('newRevenue').textContent = `New Monthly Revenue: $${newRevenue.toFixed(2)}`;
+      document.getElementById('revenueIncreaseDollar').textContent = `Revenue Increase: $${revenueIncreaseDollar.toFixed(2)}`;
+      document.getElementById('revenueIncreasePercent').textContent = `Revenue Increase (%): ${revenueIncreasePercent.toFixed(2)}%`;
+
+      document.getElementById('result').style.display = 'block';
+    }
+  </script>
+
+</body>
+
+</html>
